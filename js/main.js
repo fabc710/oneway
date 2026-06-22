@@ -209,6 +209,34 @@
   }
 
   /* -----------------------------------------------------------
+     Carousel (testimonials) — arrow navigation
+     ----------------------------------------------------------- */
+  document.querySelectorAll(".carousel").forEach(function (car) {
+    const track = car.querySelector(".carousel__track");
+    const prev = car.querySelector(".carousel__btn--prev");
+    const next = car.querySelector(".carousel__btn--next");
+    if (!track) return;
+
+    function step() {
+      const card = track.firstElementChild;
+      if (!card) return track.clientWidth;
+      const cs = getComputedStyle(track);
+      const gap = parseFloat(cs.columnGap || cs.gap) || 0;
+      return card.getBoundingClientRect().width + gap;
+    }
+    function updateButtons() {
+      const maxScroll = track.scrollWidth - track.clientWidth - 2;
+      if (prev) prev.disabled = track.scrollLeft <= 2;
+      if (next) next.disabled = track.scrollLeft >= maxScroll;
+    }
+    if (prev) prev.addEventListener("click", function () { track.scrollBy({ left: -step(), behavior: "smooth" }); });
+    if (next) next.addEventListener("click", function () { track.scrollBy({ left: step(), behavior: "smooth" }); });
+    track.addEventListener("scroll", function () { window.requestAnimationFrame(updateButtons); }, { passive: true });
+    window.addEventListener("resize", updateButtons);
+    updateButtons();
+  });
+
+  /* -----------------------------------------------------------
      Footer year
      ----------------------------------------------------------- */
   const yearEl = document.getElementById("year");
