@@ -1,17 +1,16 @@
 /* =============================================================
    One Way Insurance — contact.js
-   Client-side validation + submission scaffold for the contact form.
+   Client-side visual validation for the contact form.
 
-   >>> TO CONNECT THE BACKEND <<<
-   Set FORM_ENDPOINT below to your handler URL (e.g. a Formspree/
-   Netlify/own API endpoint). When empty, the form simulates a
-   successful submission so you can preview the UX.
+   The form submits natively to FormSubmit (see the <form action>
+   in contact.html). This script ONLY validates: if a field is
+   invalid it blocks the submit and highlights it; once everything
+   is valid it lets the browser submit the form to FormSubmit,
+   which then redirects to thank-you.html (via the _next field).
+   No backend / PHP needed — fully GitHub Pages compatible.
    ============================================================= */
 (function () {
   "use strict";
-
-  // 1) Paste your endpoint here when ready to go live:
-  const FORM_ENDPOINT = ""; // e.g. "https://formspree.io/f/xxxxxx"
 
   const form = document.getElementById("contact-form");
   if (!form) return;
@@ -41,7 +40,7 @@
       return false;
     }
     if (input.type === "checkbox" && input.hasAttribute("required") && !input.checked) {
-      setError(field, "Please confirm to continue.");
+      setError(field, "You must accept the terms to send the form.");
       return false;
     }
     if (input.type === "email" && value && !emailRe.test(value)) {
@@ -60,7 +59,8 @@
   form.querySelectorAll("input, select, textarea").forEach(function (input) {
     input.addEventListener("blur", function () { validateField(input); });
     input.addEventListener("input", function () {
-      if (input.closest(".field").classList.contains("has-error")) validateField(input);
+      const field = input.closest(".field");
+      if (field && field.classList.contains("has-error")) validateField(input);
     });
   });
 
@@ -72,56 +72,24 @@
   }
 
   form.addEventListener("submit", function (e) {
-    e.preventDefault();
-
-    // Validate all
+    // Validate every field first
     let valid = true;
     form.querySelectorAll("input, select, textarea").forEach(function (input) {
       if (!validateField(input)) valid = false;
     });
+
     if (!valid) {
+      // Block the native submit ONLY when something is invalid
+      e.preventDefault();
       showStatus("error", "Please correct the highlighted fields and try again.");
       return;
     }
 
-    const originalLabel = submitBtn ? submitBtn.textContent : "";
+    // Valid → let the form submit normally to FormSubmit (no preventDefault).
+    showStatus("success", "Sending your message…");
     if (submitBtn) {
       submitBtn.disabled = true;
       submitBtn.textContent = "Sending…";
     }
-
-    const done = function (ok) {
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = originalLabel;
-      }
-      if (ok) {
-        showStatus(
-          "success",
-          "Thank you! Your message has been received. A One Way Insurance advisor will contact you shortly."
-        );
-        form.reset();
-      } else {
-        showStatus(
-          "error",
-          "Something went wrong while sending your message. Please call us at (888) 686-5309."
-        );
-      }
-    };
-
-    // No endpoint configured yet → simulate success for preview
-    if (!FORM_ENDPOINT) {
-      setTimeout(function () { done(true); }, 900);
-      return;
-    }
-
-    // Real submission
-    fetch(FORM_ENDPOINT, {
-      method: "POST",
-      headers: { Accept: "application/json" },
-      body: new FormData(form),
-    })
-      .then(function (res) { done(res.ok); })
-      .catch(function () { done(false); });
   });
 })();

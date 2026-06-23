@@ -892,6 +892,11 @@ a.info-card:hover .info-card__go { color: var(--c-shamrock); transform: translat
 .field--check label { font-weight: 400; font-family: var(--font-body); color: var(--c-muted); font-size: 0.88rem; line-height: 1.55; }
 .field--check label a { color: var(--c-shamrock); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
 .field--check label a:hover { color: var(--c-shamrock-600); }
+/* Consent checkbox error: message on its own line + highlighted box */
+.field--check { flex-wrap: wrap; }
+.field--check .error-msg { flex-basis: 100%; margin-top: 0.15rem; }
+.field--check.has-error input { outline: 2px solid var(--c-error); outline-offset: 2px; }
+.field--check.has-error label { color: var(--c-error); }
 
 .form-note { font-size: 0.85rem; color: var(--c-muted); margin-top: var(--space-3); }
 
